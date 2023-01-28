@@ -20,7 +20,7 @@
                   isOpen={isExpandedDropdown[i]}
                   toggle={() => (isExpandedDropdown[i] = !isExpandedDropdown[i])}>
           <DropdownToggle nav caret>{navItem.text}</DropdownToggle>
-          <DropdownMenu dark style="{i === config.nav.length - 1 ? 'right: 0' : ''}">
+          <DropdownMenu dark style="{i === config.nav.length - 1 ? 'left: unset; right: 0' : ''}">
             {#each navItem.dropdown as subItem}
               {#if subItem.type === 'header'}
                 <DropdownItem header>{subItem.text}</DropdownItem>
