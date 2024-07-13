@@ -1,4 +1,5 @@
 <script lang="ts">
+  import {onMount} from "svelte";
   import {tweened} from 'svelte/motion'
   import dayjs, {Dayjs} from 'dayjs'
   import config from './config'
@@ -22,23 +23,48 @@
     $progress = (p < 1) ? p : 1
   }
 
+  // set default option
+  if (config.timer.notification?.enabled == null) {
+    Object.assign(config, {timer: {notification: {enabled: true}}})
+  }
+  if (config.timer.sound?.enabled == null) {
+    Object.assign(config, {timer: {notification: {enabled: false}}})
+  }
+
+  onMount(() => {
+    domNotificationSound.volume = config.timer?.sound?.volume ?? 0.1
+  })
+
+  if ( config.timer.notification.enabled ) {
+    Notification.requestPermission()
+  }
   resetTimer()
-  setInterval(() => {
-    timerValue = getTimerValue()
-
-    // 5 分以内ならタイマー更新のみ
-    if ( timerValue.elapsedTime < timerMaxMinutes * 60 * 1000 ) { return }
-
-    if ( triggeredAlerts[timerValue.mm] == null ) {
-      domNotificationSound.play()
-      triggeredAlerts[timerValue.mm] = true
-    }
-  }, 1000)
+  setInterval(updateTimer, 1000)
 
   function resetTimer() {
-    baseTime   = dayjs() //.add(-60 * timerMaxMinutes + 5, 'seconds')
+    baseTime   = dayjs()
     timerValue = getTimerValue()
     triggeredAlerts = {}
+  }
+
+  function updateTimer() {
+    timerValue = getTimerValue()
+
+    // 設定時間以内なら経過時間の更新のみ
+    if ( timerValue.elapsedTime < timerMaxMinutes * 60 * 1000 ) { return }
+
+    // 分をまたぐまで再通知しない
+    if ( triggeredAlerts[timerValue.mm] != null ) {
+      return
+    }
+
+    if ( config.timer.sound.enabled ) {
+      domNotificationSound.play()
+    }
+    if ( config.timer.notification.enabled ) {
+      sendNotification(`${timerValue.mm} 分経過しました`)
+    }
+    triggeredAlerts[timerValue.mm] = true
   }
 
   function getTimerValue(): TimerValue {
@@ -49,6 +75,12 @@
       mm: Math.floor(diff / 1000 / 60).toString().padStart(2, '0'),
       ss: (Math.floor(diff / 1000) % 60).toString().padStart(2, '0'),
       elapsedTime: diff,
+    }
+  }
+
+  function sendNotification(message) {
+    if (Notification?.permission !== "denied") {
+      new Notification(message)
     }
   }
 </script>
@@ -65,7 +97,7 @@
   </svg>
   <div id="timer-text">{timerValue.mm}:{timerValue.ss}</div>
   <audio id="audio-player"
-         src="{config.timer?.soundUrl}"
+         src="{config.timer?.sound?.url}"
          bind:this={domNotificationSound}
          ></audio>
 </section>

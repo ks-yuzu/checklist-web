@@ -66,6 +66,12 @@ highlight:
 
 timer:
   enabled: true
-  minutes: 5
- #soundUrl: https://smar-tone.com/data/su804.mp3 
-  soundUrl: /my-sound.mp3  # 同じディレクトリ (public) 直下のファイル
+  minutes: 0.1
+  sound:
+    enabled: true
+    volume:  0.05
+    #url: /my-sound.mp3  # 同じディレクトリ (public) 直下のファイル
+    url: https://smar-tone.com/data/su804.mp3
+  notification:
+    enabled: true
+

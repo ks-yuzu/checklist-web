@@ -29,6 +29,18 @@ export interface ChecklistTask {
   details:    string
 }
 
+export interface Timer {
+  enabled: boolean
+  minutes: number
+  sound: {
+    enabled?: boolean
+    url?: string
+  }
+  notification: {
+    enabled?: boolean
+  }
+}
+
 export class Config {
   public title:      string
   public nav:        NavItem[]
@@ -40,10 +52,7 @@ export class Config {
       background?: string
     }
   }
-  public timer: {
-    enabled: boolean
-    minutes: number
-  }
+  public timer: Timer
 
   public async load(configUrl: string) {
     const {data} = await axios.get(configUrl)
